@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RotinaCerta — Controle de Estresse</title>
+  <style>
+    /* ── Reset e base ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d1a;
+      --card:      #16162a;
+      --border:    #2a2a4a;
+      --purple:    #7c3aed;
+      --purple2:   #a855f7;
+      --green:     #10b981;
+      --red:       #ef4444;
+      --yellow:    #f59e0b;
+      --text:      #e2e8f0;
+      --muted:     #94a3b8;
+      --radius:    12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Hero / Cabeçalho ─────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #1a0533 0%, #0d0d1a 50%, #001a33 100%);
+      padding: 80px 20px 60px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+      top: -200px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(124,58,237,0.2);
+      border: 1px solid rgba(124,58,237,0.4);
+      color: var(--purple2);
+      padding: 4px 16px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 30%, var(--purple2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto 32px;
+    }
+
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .meta-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .meta-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── Navegação ────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(13,13,26,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+    }
+
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    nav a:hover { color: var(--text); background: var(--border); }
+    nav a.active { color: var(--purple2); background: rgba(124,58,237,0.15); }
+
+    /* ── Layout principal ─────────────────────── */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    section { margin-bottom: 60px; }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title .icon {
+      width: 36px; height: 36px;
+      background: rgba(124,58,237,0.2);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    /* ── Cards genéricos ──────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+
+    .card p { color: var(--muted); line-height: 1.8; }
+    .card p + p { margin-top: 12px; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+
+    /* ── Cards de estrutura ───────────────────── */
+    .struct-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+
+    .struct-card:hover { border-color: var(--purple); }
+
+    .struct-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .struct-card p { color: var(--muted); font-size: 0.9rem; }
+
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .tag-blue   { background: rgba(59,130,246,0.2); color: #60a5fa; }
+    .tag-green  { background: rgba(16,185,129,0.2); color: #34d399; }
+    .tag-orange { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    .tag-purple { background: rgba(124,58,237,0.2); color: #a78bfa; }
+
+    /* ── Tabela de ferramentas ────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(42,42,74,0.5);
+      color: var(--muted);
+    }
+
+    td:first-child { color: var(--text); font-weight: 500; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── Critérios de estresse ────────────────── */
+    .stress-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(42,42,74,0.5);
+    }
+
+    .stress-row:last-child { border-bottom: none; }
+
+    .stress-num {
+      width: 46px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .stress-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .stress-bar { height: 100%; border-radius: 3px; }
+
+    .stress-name { font-size: 0.9rem; color: var(--text); min-width: 140px; }
+    .stress-ex   { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── Bloco de código ──────────────────────── */
+    .code-block {
+      background: #0a0a14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 0.85rem;
+      color: #a5f3fc;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+
+    .code-block .comment { color: #475569; }
+    .code-block .cmd     { color: #86efac; }
+
+    /* ═══════════════════════════════════════════
+       SEÇÃO DO SISTEMA INTERATIVO
+    ═══════════════════════════════════════════ */
+
+    /* ── Formulário ───────────────────────────── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 12px;
+      align-items: end;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field input, .field select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+
+    .field input:focus, .field select:focus {
+      outline: none;
+      border-color: var(--purple);
+    }
+
+    .field input[type="range"] {
+      padding: 6px 0;
+      cursor: pointer;
+      accent-color: var(--purple);
+    }
+
+    .stress-preview {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-top: 4px;
+    }
+
+    /* ── Botões ───────────────────────────────── */
+    .btn {
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--purple);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--purple2); transform: translateY(-1px); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-outline:hover { border-color: var(--purple); color: var(--purple2); }
+
+    .btn-danger {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover { background: rgba(239,68,68,0.3); }
+
+    /* ── Timeline visual 24h ──────────────────── */
+    .timeline-wrap {
+      margin: 24px 0;
+    }
+
+    .timeline-hours {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      padding: 0 2px;
+    }
+
+    .timeline-bar {
+      height: 48px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timeline-slot {
+      position: absolute;
+      top: 0; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      overflow: hidden;
+      border-right: 1px solid rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+
+    .timeline-slot:hover { filter: brightness(1.2); }
+    .timeline-slot span { pointer-events: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px; }
+
+    /* ── Lista de atividades ──────────────────── */
+    .activity-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      transition: border-color 0.2s;
+    }
+
+    .activity-item:hover { border-color: var(--border); }
+
+    .activity-time {
+      font-size: 0.8rem;
+      color: var(--muted);
+      min-width: 90px;
+    }
+
+    .activity-name { flex: 1; font-weight: 500; }
+
+    .activity-stress {
+      font-weight: 700;
+      font-size: 0.9rem;
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ── Painel de análise ────────────────────── */
+    .stress-meter {
+      margin-top: 20px;
+    }
+
+    .meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .meter-bar-bg {
+      height: 14px;
+      background: var(--border);
+      border-radius: 7px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .meter-bar-fill {
+      height: 100%;
+      border-radius: 7px;
+      transition: width 0.6s ease, background 0.6s ease;
+      min-width: 4px;
+    }
+
+    .meter-result {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    /* ── Fila do dia ──────────────────────────── */
+    .queue-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+
+    .queue-num {
+      width: 24px; height: 24px;
+      background: rgba(124,58,237,0.2);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--purple2);
+      flex-shrink: 0;
+    }
+
+    .queue-arrow {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 4px 0;
+    }
+
+    /* ── Histórico / Pilha ────────────────────── */
+    .history-item {
+      padding: 8px 14px;
+      background: var(--bg);
+      border-left: 2px solid var(--purple);
+      margin-bottom: 4px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      border-radius: 0 6px 6px 0;
+    }
+
+    /* ── Mensagens de alerta ──────────────────── */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .alert-error   { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+    .alert-success { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+
+    /* ── Tabs (Agenda / Fila / Histórico) ─────── */
+    .tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+
+    .tab-btn {
+      padding: 8px 18px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      margin-bottom: -1px;
+    }
+
+    .tab-btn.active { color: var(--purple2); border-bottom-color: var(--purple2); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ── Status server ────────────────────────── */
+    .server-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-left: 12px;
+      vertical-align: middle;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+    }
+
+    .badge-online  { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-offline { background: rgba(245,158,11,0.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .dot-green { background: #10b981; }
+    .dot-yellow { background: #f59e0b; }
+
+    /* ── Footer ───────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════ HERO ════════════════════════════════════ -->
+<header class="hero">
+  <div class="hero-badge">Estruturas de Dados I &mdash; Grupo 2</div>
+  <h1>RotinaCerta</h1>
+  <p class="hero-sub">Organize suas 24 horas e saiba o quanto cada atividade afeta seu estresse.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <span class="meta-label">Integrante</span>
+      <span class="meta-value">Jonathan Ferreira Luna</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Grupo</span>
+      <span class="meta-value">02</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Disciplina</span>
+      <span class="meta-value">Estruturas de Dados</span>
+    </div>
+  </div>
+</header>
+
+<!-- ════════ NAV ══════════════════════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <a href="#problema"    class="active">O Problema</a>
+    <a href="#estruturas">Estruturas</a>
+    <a href="#ferramentas">Ferramentas</a>
+    <a href="#estresse">Critérios</a>
+    <a href="#instalar">Como Instalar</a>
+    <a href="#sistema">O Sistema</a>
+  </div>
+</nav>
+
+<!-- ════════ CONTEÚDO PRINCIPAL ══════════════════════ -->
+<main>
+
+  <!-- ── 1. O Problema ──────────────────────────────── -->
+  <section id="problema">
+    <h2 class="section-title">
+      <span class="icon">⚠</span>
+      O Problema
+    </h2>
+    <div class="card">
+      <p>Muitas pessoas acabam o dia exaustas sem entender o motivo. O problema não é a quantidade de horas — é a <strong>composição</strong> dessas horas. Uma agenda com dez reuniões seguidas esgota muito mais do que uma com quatro reuniões intercaladas por pausas.</p>
+      <p>Não existe hoje uma ferramenta simples que mostre, de forma clara e visual, o impacto acumulado de estresse ao longo do dia e permita reorganizar os horários antes que o dia comece.</p>
+      <p><strong>RotinaCerta</strong> resolve isso: o usuário cadastra as atividades das 24 horas, informa o quanto cada uma causa ou alivia estresse, e o sistema exibe o saldo total do dia — além de ordenar a agenda automaticamente pelo horário.</p>
+    </div>
+  </section>
+
+  <!-- ── 2. Estruturas de Dados ─────────────────────── -->
+  <section id="estruturas">
+    <h2 class="section-title">
+      <span class="icon">🗂</span>
+      Relação com Lista, Fila e Pilha
+    </h2>
+    <div class="grid-3">
+
+      <div class="struct-card">
+        <h3><span class="tag tag-blue">Lista</span></h3>
+        <p><strong>Onde é usada:</strong> agenda principal do dia.</p>
+        <p style="margin-top:10px">A lista encadeada guarda todas as atividades cadastradas. Cada nó aponta para o próximo — sem tamanho fixo. O <strong>Insertion Sort</strong> percorre essa lista para colocar as atividades em ordem cronológica.</p>
+        <p style="margin-top:8px;font-size:0.8rem;color:#7c3aed">Inserção O(n) &nbsp;|&nbsp; Remoção O(n) &nbsp;|&nbsp; Ordenação O(n²)</p>
+      </div>
+
+      <div class="struct-card">
+        <h3><span class="tag tag-green">Fila</span></h3>
+        <p><strong>Onde é usada:</strong> fila do dia (FIFO).</p>
+        <p style="margin-top:10px">Depois de ordenar, as atividades são enfileiradas em ordem cronológica. A primeira atividade do dia é a primeira a ser processada — exatamente o comportamento FIFO. Slots vazios viram <em>"Descanso"</em> automaticamente.</p>
+        <p style="margin-top:8px;font-size:0.8rem;color:#10b981">Enqueue O(1) &nbsp;|&nbsp; Dequeue O(1)</p>
+      </div>
+
+      <div class="struct-card">
+        <h3><span class="tag tag-orange">Pilha</span></h3>
+        <p><strong>Onde é usada:</strong> histórico de ações (LIFO).</p>
+        <p style="margin-top:10px">Cada ação do usuário (adicionar, remover, modificar) é empilhada. Ao desfazer, a última ação é a primeira a ser revertida — comportamento LIFO, igual ao Ctrl+Z de qualquer editor.</p>
+        <p style="margin-top:8px;font-size:0.8rem;color:#f59e0b">Push O(1) &nbsp;|&nbsp; Pop O(1)</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── 3. Ferramentas ─────────────────────────────── -->
+  <section id="ferramentas">
+    <h2 class="section-title">
+      <span class="icon">🔧</span>
+      Ferramentas Utilizadas
+    </h2>
+    <div class="grid-2">
+
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:1rem">Arquivos Java</h3>
+        <table>
+          <thead>
+            <tr><th>Arquivo</th><th>Responsabilidade</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Estruturas.java</td><td>Lista, Fila, Pilha, Atividade e Nó — as estruturas de dados e o algoritmo de ordenação</td></tr>
+            <tr><td>Banco.java</td><td>Banco de dados em arquivo de texto (.txt) — salva e carrega as atividades entre sessões</td></tr>
+            <tr><td>Servidor.java</td><td>Servidor HTTP na porta 8080 — serve esta página e responde as chamadas do navegador via API REST</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:1rem">Bibliotecas e Recursos</h3>
+        <table>
+          <thead>
+            <tr><th>Recurso</th><th>Para que serve</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>com.sun.net.httpserver</td><td>Servidor HTTP embutido no próprio Java — não precisa instalar nada extra</td></tr>
+            <tr><td>java.io.BufferedReader / FileWriter</td><td>Leitura e escrita do arquivo de banco de dados</td></tr>
+            <tr><td>java.io.IOException</td><td>Captura erros de leitura/escrita de arquivo</td></tr>
+            <tr><td>localStorage (JS)</td><td>Banco de dados do navegador — usado quando o servidor Java não está rodando</td></tr>
+            <tr><td>fetch API (JS)</td><td>Faz as chamadas HTTP do navegador para o servidor Java</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h3 style="margin-bottom:16px;font-size:1rem">Algoritmo de Ordenação — Insertion Sort</h3>
+      <div class="grid-2">
+        <div>
+          <p>O <strong>Insertion Sort</strong> (ordenação por inserção) funciona como organizar cartas na mão. Você pega uma carta, compara com as que já estão ordenadas à esquerda, e a encaixa no lugar certo deslocando as outras.</p>
+          <p style="margin-top:12px">No código, percorremos a lista com dois loops: o externo avança elemento por elemento; o interno acha onde aquele elemento se encaixa entre os já ordenados. Depois trocamos os dados dos nós para encaixá-lo.</p>
+        </div>
+        <div>
+          <table>
+            <thead><tr><th>Caso</th><th>Complexidade</th></tr></thead>
+            <tbody>
+              <tr><td>Melhor caso (já ordenado)</td><td style="color:#34d399">O(n)</td></tr>
+              <tr><td>Caso médio</td><td style="color:#fbbf24">O(n²)</td></tr>
+              <tr><td>Pior caso (invertido)</td><td style="color:#f87171">O(n²)</td></tr>
+              <tr><td>Espaço extra</td><td style="color:#34d399">O(1)</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:12px;font-size:0.85rem">Para uma agenda diária (máximo 24 slots de 1 hora), O(n²) com n≤24 é rápido o suficiente e simples de entender.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4. Critérios de Estresse ───────────────────── -->
+  <section id="estresse">
+    <h2 class="section-title">
+      <span class="icon">📊</span>
+      Critérios de Estresse
+    </h2>
+    <div class="card">
+      <p style="margin-bottom:20px">O nível de estresse vai de <strong>-10</strong> (muito relaxante) a <strong>+10</strong> (extremamente estressante). O sistema multiplica esse valor pela duração da atividade para calcular o impacto total no dia.</p>
+
+      <div id="stress-criteria">
+        <!-- Gerado pelo JS abaixo -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5. Como Instalar ───────────────────────────── -->
+  <section id="instalar">
+    <h2 class="section-title">
+      <span class="icon">💻</span>
+      Como Instalar e Executar
+    </h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:1rem">▸ Opção 1 — Com servidor Java (completo)</h3>
+        <p style="margin-bottom:14px">Salva os dados permanentemente no computador. Requer Java 11 ou superior.</p>
+        <div class="code-block">
+<span class="comment"># 1. Clone o repositório</span>
+<span class="cmd">git clone https://github.com/JonathanFLuna/rotinacerta.git
+cd rotinacerta</span>
+
+<span class="comment"># 2. Compile os 3 arquivos Java</span>
+<span class="cmd">javac -d out src/Estruturas.java src/Banco.java src/Servidor.java</span>
+
+<span class="comment"># 3. Execute o servidor</span>
+<span class="cmd">java -cp out Servidor</span>
+
+<span class="comment"># 4. Abra no navegador</span>
+http://localhost:8080
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:16px;font-size:1rem">▸ Opção 2 — Direto no navegador (demo)</h3>
+        <p style="margin-bottom:14px">Sem instalar nada. Usa o armazenamento do próprio navegador (localStorage).</p>
+        <div class="code-block">
+<span class="comment"># Basta abrir o arquivo HTML</span>
+<span class="cmd">Clique duplo em: web/index.html</span>
+
+<span class="comment"># OU arraste o arquivo para</span>
+<span class="comment"># qualquer navegador moderno</span>
+
+<span class="comment"># Os dados ficam salvos no</span>
+<span class="comment"># navegador enquanto você não</span>
+<span class="comment"># limpar o histórico</span>
+        </div>
+        <p style="margin-top:14px;font-size:0.85rem">A página detecta automaticamente qual modo está ativo e se adapta.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <h3 style="margin-bottom:12px;font-size:1rem">Estrutura de pastas do repositório</h3>
+      <div class="code-block">
+rotinacerta/
+├── src/
+│   ├── <span style="color:#a5f3fc">Estruturas.java</span>   <span class="comment">← Lista, Fila, Pilha, Insertion Sort</span>
+│   ├── <span style="color:#a5f3fc">Banco.java</span>        <span class="comment">← banco de dados em arquivo .txt</span>
+│   └── <span style="color:#a5f3fc">Servidor.java</span>     <span class="comment">← servidor HTTP + API REST</span>
+├── web/
+│   └── <span style="color:#fde68a">index.html</span>        <span class="comment">← esta página</span>
+├── data/
+│   └── rotinas.txt       <span class="comment">← banco de dados (criado automaticamente)</span>
+├── doc/
+│   └── E2_Grupo2_Design_Tecnico.md
+└── README.md
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════
+       SEÇÃO 6 — O SISTEMA INTERATIVO
+  ═══════════════════════════════════════════════════ -->
+  <section id="sistema">
+    <h2 class="section-title">
+      <span class="icon">▶</span>
+      O Sistema — Gerenciador de Rotina
+      <span id="server-badge" class="server-badge badge-offline">
+        <span class="dot dot-yellow"></span> modo local
+      </span>
+    </h2>
+
+    <!-- Formulário para adicionar atividade -->
+    <div class="card" style="margin-bottom:20px">
+      <h3 style="margin-bottom:16px;font-size:1rem">Adicionar Atividade</h3>
+      <div id="alert-msg" class="alert"></div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Nome da atividade</label>
+          <input type="text" id="inp-nome" placeholder="Ex: Trabalho, Academia, Dormir...">
+        </div>
+        <div class="field">
+          <label>Hora de início</label>
+          <input type="number" id="inp-hora" min="0" max="23" placeholder="0–23">
+        </div>
+        <div class="field">
+          <label>Duração (horas)</label>
+          <input type="number" id="inp-dur" min="1" max="24" placeholder="1–24">
+        </div>
+      </div>
+
+      <div style="margin-top:16px">
+        <div class="field">
+          <label>Nível de estresse: <span id="stress-val-label">0</span></label>
+          <input type="range" id="inp-stress" min="-10" max="10" value="0" step="1">
+        </div>
+        <div class="stress-preview" id="stress-preview-text">Neutro</div>
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="adicionarAtividade()">+ Adicionar</button>
+        <button class="btn btn-outline" onclick="limparTudo()">Limpar tudo</button>
+      </div>
+    </div>
+
+    <!-- Timeline visual -->
+    <div class="card" style="margin-bottom:20px">
+      <h3 style="margin-bottom:4px;font-size:1rem">Timeline das 24 horas</h3>
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:12px">Verde = relaxante &nbsp;|&nbsp; Vermelho = estressante &nbsp;|&nbsp; Cinza = descanso</p>
+      <div class="timeline-wrap">
+        <div class="timeline-hours" id="timeline-hours"></div>
+        <div class="timeline-bar"   id="timeline-bar"></div>
+      </div>
+    </div>
+
+    <!-- Tabs: Agenda / Fila / Histórico -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="mostrarTab('agenda', this)">📋 Agenda (Lista)</button>
+        <button class="tab-btn"        onclick="mostrarTab('fila', this)">↪ Fila do Dia</button>
+        <button class="tab-btn"        onclick="mostrarTab('historico', this)">🕓 Histórico (Pilha)</button>
+        <button class="tab-btn"        onclick="mostrarTab('analise', this)">📊 Análise</button>
+      </div>
+
+      <!-- TAB: Agenda -->
+      <div id="tab-agenda" class="tab-content active">
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">
+          Ordenada automaticamente por horário usando <strong>Insertion Sort</strong>.
+        </p>
+        <div id="activity-list" class="activity-list">
+          <p style="color:var(--muted);font-size:0.9rem">Nenhuma atividade cadastrada ainda.</p>
+        </div>
+      </div>
+
+      <!-- TAB: Fila do dia -->
+      <div id="tab-fila" class="tab-content">
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:4px">
+          Fila <strong>FIFO</strong>: a primeira atividade do dia é a primeira a ser processada. Slots vazios viram <em>Descanso</em>.
+        </p>
+        <button class="btn btn-outline" style="margin:12px 0" onclick="gerarFila()">Gerar fila do dia</button>
+        <div class="queue-arrow">↓ próxima a ser processada</div>
+        <div id="fila-list"></div>
+      </div>
+
+      <!-- TAB: Histórico -->
+      <div id="tab-historico" class="tab-content">
+        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">
+          Pilha <strong>LIFO</strong>: a última ação fica no topo. <em>Desfazer</em> retira do topo.
+        </p>
+        <button class="btn btn-outline" style="margin-bottom:12px" onclick="desfazer()">↩ Desfazer última ação</button>
+        <div id="historico-list"></div>
+      </div>
+
+      <!-- TAB: Análise -->
+      <div id="tab-analise" class="tab-content">
+        <div class="stress-meter">
+          <div class="meter-label">
+            <span>Muito relaxante</span>
+            <span>Equilibrado</span>
+            <span>Muito estressante</span>
+          </div>
+          <div class="meter-bar-bg">
+            <div class="meter-bar-fill" id="meter-fill" style="width:50%;background:var(--yellow)"></div>
+          </div>
+          <div class="meter-result" id="meter-result">—</div>
+        </div>
+        <div id="ranking-list" style="margin-top:20px"></div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>RotinaCerta &mdash; Jonathan Ferreira Luna &mdash; Grupo 2 &mdash; Estruturas de Dados I</p>
+  <p style="margin-top:4px;font-size:0.8rem">Lista Encadeada · Fila FIFO · Pilha LIFO · Insertion Sort</p>
+</footer>
+
+
+<!-- ════════ JAVASCRIPT ═══════════════════════════════ -->
+<script>
+// ── Configuração ──────────────────────────────────────
+const API      = 'http://localhost:8080/api';
+let   usarAPI  = false;   // será true se o servidor Java estiver rodando
+let   atividades = [];    // array em memória (espelho do banco)
+let   historicoLocal = [];
+
+// ── Verificar se o servidor Java está rodando ─────────
+async function checarServidor() {
+  try {
+    const r = await fetch(API + '/atividades', { signal: AbortSignal.timeout(800) });
+    if (r.ok) {
+      usarAPI = true;
+      document.getElementById('server-badge').className = 'server-badge badge-online';
+      document.getElementById('server-badge').innerHTML =
+        '<span class="dot dot-green"></span> servidor Java online';
+    }
+  } catch (_) { /* usa localStorage */ }
+}
+
+// ── Carregar atividades do banco ──────────────────────
+async function carregarAtividades() {
+  if (usarAPI) {
+    const r = await fetch(API + '/atividades');
+    atividades = await r.json();
+  } else {
+    atividades = JSON.parse(localStorage.getItem('rotinacerta') || '[]');
+  }
+  renderizarTudo();
+}
+
+// ── Salvar no localStorage (modo offline) ─────────────
+function salvarLocal() {
+  localStorage.setItem('rotinacerta', JSON.stringify(atividades));
+}
+
+// ── Insertion Sort em JS (mesma lógica do Java) ───────
+function insertionSortHorario(arr) {
+  for (let i = 1; i < arr.length; i++) {
+    const chave = arr[i];
+    let j = i - 1;
+    while (j >= 0 && arr[j].horaInicio > chave.horaInicio) {
+      arr[j + 1] = arr[j];
+      j--;
+    }
+    arr[j + 1] = chave;
+  }
+  return arr;
+}
+
+// ── Adicionar atividade ───────────────────────────────
+async function adicionarAtividade() {
+  const nome     = document.getElementById('inp-nome').value.trim();
+  const hora     = parseInt(document.getElementById('inp-hora').value);
+  const duracao  = parseInt(document.getElementById('inp-dur').value);
+  const estresse = parseInt(document.getElementById('inp-stress').value);
+
+  if (!nome)            return mostrarAlerta('Digite o nome da atividade.', 'error');
+  if (isNaN(hora)    || hora < 0   || hora > 23) return mostrarAlerta('Hora inválida (0-23).', 'error');
+  if (isNaN(duracao) || duracao < 1)              return mostrarAlerta('Duração mínima: 1 hora.', 'error');
+  if ((hora + duracao) > 24)                      return mostrarAlerta('Atividade ultrapassa meia-noite.', 'error');
+
+  // Verifica conflito localmente
+  for (const a of atividades) {
+    if (hora < (a.horaInicio + a.duracao) && (hora + duracao) > a.horaInicio) {
+      return mostrarAlerta('Conflito de horário com "' + a.nome + '"!', 'error');
+    }
+  }
+
+  const nova = { nome, horaInicio: hora, duracao, nivelEstresse: estresse,
+                 horaFim: hora + duracao, estresseTotal: estresse * duracao };
+
+  if (usarAPI) {
+    try {
+      const r = await fetch(API + '/atividades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, horaInicio: hora, duracao, nivelEstresse: estresse })
+      });
+      if (!r.ok) { const e = await r.json(); return mostrarAlerta(e.erro, 'error'); }
+      await carregarAtividades();
+    } catch (_) { usarAPI = false; }
+  }
+
+  if (!usarAPI) {
+    atividades.push(nova);
+    insertionSortHorario(atividades);
+    salvarLocal();
+    historicoLocal.unshift('ADICIONOU: ' + nome + ' às ' + hora + ':00');
+  }
+
+  mostrarAlerta('✓ ' + nome + ' adicionada!', 'success');
+  document.getElementById('inp-nome').value = '';
+  renderizarTudo();
+}
+
+// ── Remover atividade ─────────────────────────────────
+async function removerAtividade(pos) {
+  const nome = atividades[pos].nome;
+
+  if (usarAPI) {
+    await fetch(API + '/atividades?pos=' + pos, { method: 'DELETE' });
+    await carregarAtividades();
+  } else {
+    atividades.splice(pos, 1);
+    salvarLocal();
+    historicoLocal.unshift('REMOVEU: ' + nome);
+  }
+  renderizarTudo();
+}
+
+// ── Desfazer ──────────────────────────────────────────
+function desfazer() {
+  if (historicoLocal.length === 0) {
+    alert('Histórico vazio!');
+    return;
+  }
+  const acao = historicoLocal.shift();
+  mostrarAlerta('↩ Desfeita: ' + acao, 'success');
+  renderizarHistorico();
+}
+
+// ── Limpar tudo ───────────────────────────────────────
+function limparTudo() {
+  if (!confirm('Remover todas as atividades?')) return;
+  atividades = [];
+  historicoLocal = [];
+  salvarLocal();
+  renderizarTudo();
+}
+
+// ── Gerar fila do dia ─────────────────────────────────
+async function gerarFila() {
+  let fila = [];
+
+  if (usarAPI) {
+    const r = await fetch(API + '/fila');
+    fila = await r.json();
+  } else {
+    // Monta a fila localmente (mesma lógica do Java)
+    const ordenadas = [...atividades].sort((a, b) => a.horaInicio - b.horaInicio);
+    let horaAtual = 0;
+    for (const a of ordenadas) {
+      if (a.horaInicio > horaAtual) {
+        fila.push({ nome: 'Descanso / Tempo livre', horaInicio: horaAtual,
+                    duracao: a.horaInicio - horaAtual, nivelEstresse: -1,
+                    horaFim: a.horaInicio });
+      }
+      fila.push(a);
+      horaAtual = a.horaInicio + a.duracao;
+    }
+    if (horaAtual < 24) {
+      fila.push({ nome: 'Descanso / Tempo livre', horaInicio: horaAtual,
+                  duracao: 24 - horaAtual, nivelEstresse: -1, horaFim: 24 });
+    }
+  }
+
+  renderizarFila(fila);
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDERIZAÇÃO
+// ══════════════════════════════════════════════════════
+
+function renderizarTudo() {
+  renderizarTimeline();
+  renderizarAgenda();
+  renderizarHistorico();
+  renderizarAnalise();
+}
+
+// ── Timeline ──────────────────────────────────────────
+function renderizarTimeline() {
+  const bar   = document.getElementById('timeline-bar');
+  const horas = document.getElementById('timeline-hours');
+
+  // Labels de hora
+  horas.innerHTML = '';
+  for (let h = 0; h <= 24; h += 3) {
+    const span = document.createElement('span');
+    span.textContent = h + 'h';
+    horas.appendChild(span);
+  }
+
+  // Slots de atividade
+  bar.innerHTML = '';
+
+  // Fundo cinza (descanso)
+  const bg = document.createElement('div');
+  bg.className = 'timeline-slot';
+  bg.style.left  = '0%';
+  bg.style.width = '100%';
+  bg.style.background = '#1e1e3a';
+  bar.appendChild(bg);
+
+  for (const a of atividades) {
+    const slot = document.createElement('div');
+    slot.className = 'timeline-slot';
+    slot.style.left  = (a.horaInicio / 24 * 100) + '%';
+    slot.style.width = (a.duracao    / 24 * 100) + '%';
+    slot.style.background = corEstresse(a.nivelEstresse);
+    slot.style.color = a.nivelEstresse === 0 ? '#94a3b8' : '#fff';
+    const sp = document.createElement('span');
+    sp.textContent = a.nome;
+    slot.appendChild(sp);
+    bar.appendChild(slot);
+  }
+}
+
+// ── Agenda ────────────────────────────────────────────
+function renderizarAgenda() {
+  const el = document.getElementById('activity-list');
+  if (atividades.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Nenhuma atividade cadastrada.</p>';
+    return;
+  }
+
+  el.innerHTML = '';
+  atividades.forEach((a, i) => {
+    const item = document.createElement('div');
+    item.className = 'activity-item';
+
+    const cor   = corEstresse(a.nivelEstresse);
+    const sinal = a.nivelEstresse > 0 ? '+' : '';
+
+    item.innerHTML = `
+      <div class="activity-time">
+        ${String(a.horaInicio).padStart(2,'0')}:00 – ${String(a.horaInicio + a.duracao).padStart(2,'0')}:00
+      </div>
+      <div class="activity-name">${a.nome}</div>
+      <div class="activity-stress" style="color:${cor}">${sinal}${a.nivelEstresse}</div>
+      <button class="btn btn-danger" onclick="removerAtividade(${i})">✕</button>
+    `;
+    el.appendChild(item);
+  });
+}
+
+// ── Fila ──────────────────────────────────────────────
+function renderizarFila(fila) {
+  const el = document.getElementById('fila-list');
+  el.innerHTML = '';
+  fila.forEach((a, i) => {
+    const item = document.createElement('div');
+    item.className = 'queue-item';
+    const sinal = a.nivelEstresse > 0 ? '+' : '';
+    const cor   = corEstresse(a.nivelEstresse);
+    const descanso = a.nome.includes('Descanso');
+    item.innerHTML = `
+      <div class="queue-num">${i + 1}</div>
+      <div style="flex:1">
+        <div style="font-weight:${descanso ? '400' : '500'};color:${descanso ? 'var(--muted)' : 'var(--text)'}">
+          ${a.nome}
+        </div>
+        <div style="font-size:0.8rem;color:var(--muted)">
+          ${String(a.horaInicio).padStart(2,'0')}:00 – ${String(a.horaInicio + a.duracao).padStart(2,'0')}:00
+          &nbsp;(${a.duracao}h)
+        </div>
+      </div>
+      <div style="font-weight:700;color:${cor};font-size:0.9rem">${sinal}${a.nivelEstresse}</div>
+    `;
+    el.appendChild(item);
+  });
+}
+
+// ── Histórico ─────────────────────────────────────────
+function renderizarHistorico() {
+  const el = document.getElementById('historico-list');
+  if (historicoLocal.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:0.9rem">Nenhuma ação registrada.</p>';
+    return;
+  }
+  el.innerHTML = historicoLocal.map(a =>
+    `<div class="history-item">${a}</div>`
+  ).join('');
+}
+
+// ── Análise de estresse ───────────────────────────────
+function renderizarAnalise() {
+  const total    = atividades.reduce((s, a) => s + a.nivelEstresse * a.duracao, 0);
+  const pct      = Math.min(Math.max((total + 60) / 120 * 100, 2), 98);
+  const fill     = document.getElementById('meter-fill');
+  const resultado = document.getElementById('meter-result');
+
+  fill.style.width      = pct + '%';
+  fill.style.background = total < 0 ? '#10b981' : total === 0 ? '#f59e0b' : '#ef4444';
+
+  let texto = '';
+  if      (total <= -10) texto = '😌 Dia muito relaxante  (total: ' + total + ')';
+  else if (total <    0) texto = '🙂 Dia tranquilo  (total: '       + total + ')';
+  else if (total ===  0) texto = '😐 Dia equilibrado  (total: 0)';
+  else if (total <=  15) texto = '😑 Dia moderado  (total: +'       + total + ')';
+  else if (total <=  30) texto = '😟 Dia estressante  (total: +'    + total + ')';
+  else                   texto = '😰 Dia muito estressante!  (total: +' + total + ')';
+
+  resultado.textContent = texto;
+  resultado.style.color = total < 0 ? '#10b981' : total === 0 ? '#f59e0b' : '#ef4444';
+
+  // Ranking
+  const ranking = document.getElementById('ranking-list');
+  if (atividades.length === 0) { ranking.innerHTML = ''; return; }
+
+  const ordenado = [...atividades].sort((a, b) => b.nivelEstresse - a.nivelEstresse);
+  ranking.innerHTML = '<h4 style="font-size:0.9rem;color:var(--muted);margin-bottom:10px">Ranking de impacto (maior → menor)</h4>' +
+    ordenado.map(a => {
+      const cor   = corEstresse(a.nivelEstresse);
+      const sinal = a.nivelEstresse > 0 ? '+' : '';
+      return `<div class="activity-item" style="margin-bottom:6px">
+        <div class="activity-time">${String(a.horaInicio).padStart(2,'0')}:00</div>
+        <div class="activity-name">${a.nome}</div>
+        <div class="activity-stress" style="color:${cor}">${sinal}${a.nivelEstresse}</div>
+      </div>`;
+    }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  CRITÉRIOS DE ESTRESSE (tabela da seção 4)
+// ══════════════════════════════════════════════════════
+
+const criterios = [
+  { nivel: -10, nome: 'Muito relaxante',        exemplos: 'Meditação profunda, spa' },
+  { nivel:  -4, nome: 'Relaxante',              exemplos: 'Dormir (7-8h), ioga' },
+  { nivel:  -2, nome: 'Levemente relaxante',    exemplos: 'Academia, caminhada' },
+  { nivel:  -1, nome: 'Neutro / descanso',      exemplos: 'Refeição tranquila, pausa' },
+  { nivel:   0, nome: 'Sem impacto',            exemplos: 'Higiene pessoal, trajeto curto' },
+  { nivel:  +2, nome: 'Levemente estressante',  exemplos: 'Trabalho leve, estudo rotineiro' },
+  { nivel:  +5, nome: 'Moderado',               exemplos: 'Trabalho intenso, prova' },
+  { nivel:  +7, nome: 'Estressante',            exemplos: 'Apresentação, reunião importante' },
+  { nivel:  +9, nome: 'Muito estressante',      exemplos: 'Deadline urgente, conflito' },
+  { nivel: +10, nome: 'Extremamente estressante', exemplos: 'Crise, emergência' },
+];
+
+function renderizarCriterios() {
+  const el = document.getElementById('stress-criteria');
+  el.innerHTML = criterios.map(c => {
+    const cor  = corEstresse(c.nivel);
+    const sinal = c.nivel > 0 ? '+' : '';
+    const abs  = Math.abs(c.nivel);
+    const pct  = abs / 10 * 100;
+    return `
+      <div class="stress-row">
+        <div class="stress-num" style="color:${cor}">${sinal}${c.nivel}</div>
+        <div class="stress-bar-wrap">
+          <div class="stress-bar" style="width:${pct}%;background:${cor}"></div>
+        </div>
+        <div class="stress-name">${c.nome}</div>
+        <div class="stress-ex">${c.exemplos}</div>
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  UTILITÁRIOS
+// ══════════════════════════════════════════════════════
+
+function corEstresse(nivel) {
+  if (nivel <= -3) return '#10b981';   // verde forte
+  if (nivel <   0) return '#34d399';   // verde claro
+  if (nivel ===  0) return '#64748b';  // cinza
+  if (nivel <=  3) return '#f59e0b';   // amarelo
+  if (nivel <=  6) return '#f97316';   // laranja
+  return '#ef4444';                    // vermelho
+}
+
+function mostrarAlerta(msg, tipo) {
+  const el = document.getElementById('alert-msg');
+  el.textContent = msg;
+  el.className = 'alert alert-' + tipo;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+function mostrarTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'analise') renderizarAnalise();
+}
+
+// Atualiza o label e a cor enquanto arrasta o slider de estresse
+document.getElementById('inp-stress').addEventListener('input', function() {
+  const v    = parseInt(this.value);
+  const el   = document.getElementById('stress-val-label');
+  const prev = document.getElementById('stress-preview-text');
+  el.textContent = (v > 0 ? '+' : '') + v;
+  el.style.color = corEstresse(v);
+
+  const c = criterios.find(c => c.nivel === v) || criterios.find(c => c.nivel === 0);
+  prev.textContent = c ? c.nome : '';
+  prev.style.color = corEstresse(v);
+});
+
+// Nav highlight ao rolar
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      const link = document.querySelector('nav a[href="#' + e.target.id + '"]');
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('section[id]').forEach(s => observer.observe(s));
+
+// ── Inicialização ──────────────────────────────────────
+(async () => {
+  renderizarCriterios();
+  await checarServidor();
+  await carregarAtividades();
+})();
+</script>
+
+</body>
+</html>
