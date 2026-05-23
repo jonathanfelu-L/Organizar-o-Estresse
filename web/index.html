@@ -876,39 +876,45 @@ rotinacerta/
     <!-- Tabs: Agenda / Fila / Histórico -->
     <div class="card">
       <div class="tabs">
-        <button class="tab-btn active" onclick="mostrarTab('agenda', this)">📋 Agenda (Lista)</button>
-        <button class="tab-btn"        onclick="mostrarTab('fila', this)">↪ Fila do Dia</button>
-        <button class="tab-btn"        onclick="mostrarTab('historico', this)">🕓 Histórico (Pilha)</button>
+        <button class="tab-btn active" onclick="mostrarTab('agenda', this)">📋 Lista Encadeada</button>
+        <button class="tab-btn"        onclick="mostrarTab('fila', this)">↪ Fila FIFO</button>
+        <button class="tab-btn"        onclick="mostrarTab('historico', this)">🗂 Pilha LIFO</button>
         <button class="tab-btn"        onclick="mostrarTab('analise', this)">📊 Análise</button>
       </div>
 
-      <!-- TAB: Agenda -->
+      <!-- TAB: Lista Encadeada -->
       <div id="tab-agenda" class="tab-content active">
-        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">
-          Ordenada automaticamente por horário usando <strong>Insertion Sort</strong>.
-        </p>
+        <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:14px;margin-bottom:14px">
+          <p style="font-size:0.9rem;font-weight:600;color:var(--purple2);margin-bottom:6px">🔗 Estrutura: Lista Encadeada</p>
+          <p style="font-size:0.85rem;color:var(--muted)">Cada atividade é um <strong>nó</strong> que aponta para o próximo. O <strong>Insertion Sort</strong> percorre a lista e reordena os nós por horário de início sempre que uma atividade é adicionada. Inserção e remoção: O(n). Ordenação: O(n²).</p>
+        </div>
         <div id="activity-list" class="activity-list">
           <p style="color:var(--muted);font-size:0.9rem">Nenhuma atividade cadastrada ainda.</p>
         </div>
       </div>
 
-      <!-- TAB: Fila do dia -->
+      <!-- TAB: Fila FIFO -->
       <div id="tab-fila" class="tab-content">
-        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:4px">
-          Fila <strong>FIFO</strong>: a primeira atividade do dia é a primeira a ser processada. Slots vazios viram <em>Descanso</em>.
-        </p>
-        <button class="btn btn-outline" style="margin:12px 0" onclick="gerarFila()">Gerar fila do dia</button>
-        <div class="queue-arrow">↓ próxima a ser processada</div>
+        <div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:14px;margin-bottom:14px">
+          <p style="font-size:0.9rem;font-weight:600;color:#34d399;margin-bottom:6px">↪ Estrutura: Fila FIFO (First In, First Out)</p>
+          <p style="font-size:0.85rem;color:var(--muted)">A primeira atividade do dia é a primeira a ser processada — igual fila de banco. Slots de tempo vazio viram <em>Descanso</em> automaticamente. <strong>Enqueue</strong> (entrar na fila) e <strong>Dequeue</strong> (sair da fila) são ambos O(1).</p>
+        </div>
+        <button class="btn btn-outline" style="margin-bottom:12px" onclick="gerarFila()">↪ Gerar fila do dia</button>
+        <div class="queue-arrow">↓ FRENTE DA FILA — próxima atividade a ser processada (Dequeue)</div>
         <div id="fila-list"></div>
+        <div class="queue-arrow" id="fundo-fila" style="display:none">↑ FUNDO DA FILA — última atividade (Enqueue entra aqui)</div>
       </div>
 
-      <!-- TAB: Histórico -->
+      <!-- TAB: Pilha LIFO -->
       <div id="tab-historico" class="tab-content">
-        <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px">
-          Pilha <strong>LIFO</strong>: a última ação fica no topo. <em>Desfazer</em> retira do topo.
-        </p>
-        <button class="btn btn-outline" style="margin-bottom:12px" onclick="desfazer()">↩ Desfazer última ação</button>
+        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:14px;margin-bottom:14px">
+          <p style="font-size:0.9rem;font-weight:600;color:#fbbf24;margin-bottom:6px">🗂 Estrutura: Pilha LIFO (Last In, Last Out)</p>
+          <p style="font-size:0.85rem;color:var(--muted)">Cada ação do usuário é <strong>empilhada (Push)</strong> no topo. Ao desfazer, a ação mais recente é <strong>desempilhada (Pop)</strong> do topo — o último que entrou é o primeiro a sair, igual Ctrl+Z. Push e Pop são O(1).</p>
+        </div>
+        <button class="btn btn-outline" style="margin-bottom:12px" onclick="desfazer()">↩ Pop — desempilhar última ação</button>
+        <div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px">↓ TOPO DA PILHA — última ação realizada (Pop sai daqui)</div>
         <div id="historico-list"></div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px" id="base-pilha">↑ BASE DA PILHA — primeira ação realizada</div>
       </div>
 
       <!-- TAB: Análise -->
@@ -1097,6 +1103,7 @@ async function gerarFila() {
   }
 
   renderizarFila(fila);
+  document.getElementById('fundo-fila').style.display = fila.length ? 'block' : 'none';
 }
 
 // ══════════════════════════════════════════════════════
